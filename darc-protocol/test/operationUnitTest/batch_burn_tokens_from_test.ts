@@ -5,7 +5,14 @@ import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 
 // test for batch mint token instruction on DARC
-
+function containsAddr(array: string[], addr:string): boolean {
+  for (let i = 0; i < array.length; i++) {
+    if (array[i].toLowerCase() === addr.toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+}
 describe("batch_burn_tokens_from_to_test", function () {
 
   
@@ -13,7 +20,7 @@ describe("batch_burn_tokens_from_to_test", function () {
 
     const DARC = await ethers.getContractFactory("DARC");
     const darc = await DARC.deploy();
-    console.log("DARC address: ", darc.address);
+    //console.log("DARC address: ", darc.address);
     await darc.deployed();
     await darc.initialize();
 
@@ -29,12 +36,13 @@ describe("batch_burn_tokens_from_to_test", function () {
     // create a token class first
     await darc.entrance({
       programOperatorAddress: programOperatorAddress,
+      notes: "create token class",
       operations: [{
         operatorAddress: programOperatorAddress,
         opcode: 2, // create token class
         param: {
-          UINT256_ARRAY: [],
-          ADDRESS_ARRAY: [],
+          
+          
           STRING_ARRAY: ["Class1", "Class2"],
           BOOL_ARRAY: [],
           VOTING_RULE_ARRAY: [],
@@ -45,7 +53,8 @@ describe("batch_burn_tokens_from_to_test", function () {
             [BigNumber.from(10), BigNumber.from(1)],
             [BigNumber.from(10), BigNumber.from(1)],
           ],
-          ADDRESS_2DARRAY: []
+          ADDRESS_2DARRAY: [],
+          BYTES: []
         }
       }], 
     });
@@ -54,12 +63,13 @@ describe("batch_burn_tokens_from_to_test", function () {
     // mint tokens
     await darc.entrance({
       programOperatorAddress: programOperatorAddress,
+      notes: "mint tokens",
       operations: [{
         operatorAddress: programOperatorAddress,
         opcode: 1, // mint token
         param: {
-          UINT256_ARRAY: [],
-          ADDRESS_ARRAY: [],
+          
+          
           STRING_ARRAY: [],
           BOOL_ARRAY: [],
           VOTING_RULE_ARRAY: [],
@@ -71,15 +81,16 @@ describe("batch_burn_tokens_from_to_test", function () {
           ],
           ADDRESS_2DARRAY: [
             [target2,target3], // to = target 2, target 3
-          ]
+          ],
+          BYTES: []
         }
       },
       {
         operatorAddress: programOperatorAddress,
         opcode: 6, // burn tokens from target 2 and target 3
         param:{
-          UINT256_ARRAY: [],
-          ADDRESS_ARRAY: [],
+          
+          
           STRING_ARRAY: [],
           BOOL_ARRAY: [],
           VOTING_RULE_ARRAY: [],
@@ -91,7 +102,8 @@ describe("batch_burn_tokens_from_to_test", function () {
           ],
           ADDRESS_2DARRAY: [
             [target2,target3], // from = target 2, target 3
-          ]
+          ],
+          BYTES: []
         }
       }], 
     });
@@ -101,5 +113,39 @@ describe("batch_burn_tokens_from_to_test", function () {
     // class 1 = 200 - 40 = 160
     expect ((await darc.getTokenOwnerBalance(0, target2)).toBigInt().toString()).to.equal("90");
     expect ((await darc.getTokenOwnerBalance(1, target3)).toBigInt().toString()).to.equal("160"); 
+
+    expect(containsAddr(await darc.getTokenOwners(0), target2)).to.equal(true);
+    expect(containsAddr(await darc.getTokenOwners(1), target3)).to.equal(true);
+
+    // next burn all tokens from target 2 and target 3, make sure they are removed from the token owners list
+    await darc.entrance({
+      notes: "burn all tokens from target 2 and target 3",
+      programOperatorAddress: programOperatorAddress,
+      operations: [
+      {
+        operatorAddress: programOperatorAddress,
+        opcode: 6, // burn tokens from target 2 and target 3
+        param:{
+          
+          
+          STRING_ARRAY: [],
+          BOOL_ARRAY: [],
+          VOTING_RULE_ARRAY: [],
+          PARAMETER_ARRAY: [],
+          PLUGIN_ARRAY: [],
+          UINT256_2DARRAY: [
+            [BigNumber.from(0),BigNumber.from(1)],  // token class = 0, 1
+            [BigNumber.from(90), BigNumber.from(160)], // amount = 10, 40
+          ],
+          ADDRESS_2DARRAY: [
+            [target2,target3], // from = target 2, target 3
+          ],
+          BYTES: []
+        }
+      }], 
+    });
+
+    expect(containsAddr(await darc.getTokenOwners(0), target2)).to.equal(false);
+    expect(containsAddr(await darc.getTokenOwners(1), target3)).to.equal(false);
   });
 });

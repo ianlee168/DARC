@@ -47,7 +47,7 @@ const darc_contract_address = await darcjs.deployDARC(
   DARC_VERSION.Test, signer
 );
 
-// acceess the deployed DARC via the DARC contract address
+// access the deployed DARC via the DARC contract address
 const myDeployedDARC = new darcjs.DARC({
   address: darc_contract_address,
   wallet: signer,
@@ -69,4 +69,19 @@ const myDeployedDARC_readOnly = new darcjs.DARC({
 
 // Read information from the DARC
 const memberList = await myDARC_readOnly.getMemberList();
+```
+
+### Test
+
+Before running the test, you need to start a Hardhat Network in your neighbour folder `darc-protocol`
+
+```bash
+cd ../darc-protocol
+npx hardhat node
+```
+
+Then, you can run the test in `darc-js` folder. Run below command in another terminal.
+
+```bash
+pnpm run test
 ```

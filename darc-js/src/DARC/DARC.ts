@@ -1,13 +1,15 @@
-import * as runtime from '../runtime/runtime';
+import * as runtime from '../deployDARC/deployDARC';
 import { ethers, Contract } from 'ethers';
 import * as darcBinary from '../darcBinary/darcBinary';
-
+import { DARC_VERSION } from '../darcBinary/darcBinary';
+export {DARC_VERSION}
 export type InitParam = {
   address: string;
   version: darcBinary.DARC_VERSION;
   wallet?: ethers.Wallet;
   provider?: ethers.providers.Provider;
 }
+
 
 export type TokenInfo = {
   votingWeight: BigInt,
@@ -22,6 +24,7 @@ export type MemberInfo = {
   name: string,
   role: bigint
 }
+
 
 /**
  * The DARC class is used to interact with the DARC contract.
@@ -60,12 +63,7 @@ export class DARC {
     if (this.wallet === undefined){
       throw new Error("Wallet is not provided for this DARC instance.");
     }
-    try{
-      await this.darcContract.entrance(program);
-    }
-    catch(e){
-      console.log("Error when running the program: " + e);
-    }
+    await this.darcContract.entrance(program);
   }
 
   /**

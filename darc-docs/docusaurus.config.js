@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
     title: 'DARC Docs',
     tagline: 'Decentralized Autonomous Regulated Corporation (DARC), your on-chain company.',
-    favicon: 'img/favicon.ico',
+    favicon: 'img/darc-logo.png',
 
     // Set the production url of your site here
     url: 'https://your-docusaurus-test-site.com',
@@ -64,9 +64,24 @@ const config = {
             colorMode: {
                 disableSwitch: true
             },
+            algolia: {
+                // The application ID provided by Algolia
+                appId: 'JYQVEBDKBP',
+
+                // Public API key: it is safe to commit it
+                apiKey: '695a3556e6bf7d738b5c67b00996ed0a',
+
+                indexName: 'darc',
+
+                // Optional: see doc section below
+                contextualSearch: true,
+            },
             // Replace with your project's social card
             image: 'img/docusaurus-social-card.jpg',
             navbar: {
+                logo: {
+                    src: 'img/darc-logo.png',
+                },
                 items: [
                     {
                         label: 'Home',

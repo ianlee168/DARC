@@ -5,6 +5,14 @@ import { ethers } from "hardhat";
 import { BigNumber } from "ethers";
 
 // test for batch mint token instruction on DARC
+function containsAddr(array: string[], addr:string): boolean {
+  for (let i = 0; i < array.length; i++) {
+    if (array[i].toLowerCase() === addr.toLowerCase()) {
+      return true;
+    }
+  }
+  return false;
+}
 
 describe("batch_pay_to_transfer_token_test", function () {
 
@@ -13,7 +21,7 @@ describe("batch_pay_to_transfer_token_test", function () {
 
     const DARC = await ethers.getContractFactory("DARC");
     const darc = await DARC.deploy();
-    console.log("DARC address: ", darc.address);
+    //console.log("DARC address: ", darc.address);
     await darc.deployed();
     await darc.initialize();
 
@@ -26,12 +34,13 @@ describe("batch_pay_to_transfer_token_test", function () {
     // create a token class first
     await darc.entrance({
       programOperatorAddress: programOperatorAddress,
+      notes: "create token class",
       operations: [{
         operatorAddress: programOperatorAddress,
         opcode: 2, // create token class
         param: {
-          UINT256_ARRAY: [],
-          ADDRESS_ARRAY: [],
+          
+          
           STRING_ARRAY: ["Class1", "Class2"],
           BOOL_ARRAY: [],
           VOTING_RULE_ARRAY: [],
@@ -42,7 +51,8 @@ describe("batch_pay_to_transfer_token_test", function () {
             [BigNumber.from(10), BigNumber.from(1)],
             [BigNumber.from(10), BigNumber.from(1)],
           ],
-          ADDRESS_2DARRAY: []
+          ADDRESS_2DARRAY: [],
+          BYTES: []
         }
       }], 
     });
@@ -50,12 +60,13 @@ describe("batch_pay_to_transfer_token_test", function () {
 
     const result_entrance = await darc.entrance({
       programOperatorAddress: programOperatorAddress,
+      notes: "pay to mint and transfer tokens",
       operations: [{
         operatorAddress: programOperatorAddress,
         opcode: 20, // pay to mint token
         param: {
-          UINT256_ARRAY: [],
-          ADDRESS_ARRAY: [],
+          
+          
           STRING_ARRAY: [],
           BOOL_ARRAY: [],
           VOTING_RULE_ARRAY: [],
@@ -68,15 +79,16 @@ describe("batch_pay_to_transfer_token_test", function () {
           ],
           ADDRESS_2DARRAY: [
             [programOperatorAddress,programOperatorAddress], // to = programOperatorAddress
-          ]
+          ],
+          BYTES: []
         }
       },
       {
         operatorAddress: programOperatorAddress,
         opcode: 21, // pay to transfer tokens
         param: {
-          UINT256_ARRAY: [],
-          ADDRESS_ARRAY: [],
+          
+          
           STRING_ARRAY: [],
           BOOL_ARRAY: [],
           VOTING_RULE_ARRAY: [],
@@ -89,7 +101,8 @@ describe("batch_pay_to_transfer_token_test", function () {
           ],
           ADDRESS_2DARRAY: [
             [target1 ,target2], // to = programOperatorAddress
-          ]
+          ],
+          BYTES: []
         }
       }], 
     }, 
@@ -102,5 +115,12 @@ describe("batch_pay_to_transfer_token_test", function () {
 
     expect(balance0.toBigInt().toString()).to.equal("100");
     expect(balance1.toBigInt().toString()).to.equal("200");
+
+    // expect target 1 and target 2 to be the owner of token 0 and 1
+    const owner0 = await darc.getTokenOwners(0);
+    const owner1 = await darc.getTokenOwners(1);
+    expect(containsAddr(owner0, target1)).to.equal(true);
+    expect(containsAddr(owner1, target2)).to.equal(true);
+    
   });
 });

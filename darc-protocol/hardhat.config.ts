@@ -3,21 +3,22 @@ import "@nomicfoundation/hardhat-toolbox";
 import "@openzeppelin/hardhat-upgrades";
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.17",
+    version: "0.8.19",
     settings: {
       viaIR: true,
       optimizer: { 
         enabled: true,
-        runs: 1,
-        details: {
-           yul: true,
-        }
+        runs: 10,
+        // details: {
+        //    yul: true,
+        // }
       },
     },
   },
   networks: {
     hardhat: {
       allowUnlimitedContractSize: true,
+      blockGasLimit: 9007199254740,
     }
   }
 };
